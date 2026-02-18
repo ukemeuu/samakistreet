@@ -14,11 +14,11 @@ const menuData = {
     boxes: [
         { id: 'bl', name: 'Fish Lunchbox', price: 850, desc: '2 Fish Fingers + Reg Chips + Coleslaw + 300ml Soda', img: '/assets/Homemade-Filet-O-Fish_3.webp' },
         { id: 'bcb', name: 'Crunch Burger Box', price: 950, desc: 'Fish Fillet Burger + 1 Fish Finger + Reg Chips + 300ml Soda', img: '/assets/Homemade-Filet-O-Fish_3.webp' },
-        { id: 'bsb', name: 'Samaki Bites Box', price: 850, desc: '5 Spicy Fish Bites + Reg Chips + 300ml Soda', img: '/assets/l bh 57v77b v.jpg.webp' }
+        { id: 'bsb', name: 'Samaki Bites Box', price: 850, desc: '5 Spicy Fish Bites + Reg Chips + 300ml Soda', img: '/assets/fish-bites.webp' }
     ],
     burgers: [
-        { id: 'cb', name: 'Colonel Burger (Fish)', price: 650, desc: 'Crispy breaded fish fillet, fresh lettuce, and sauce', img: '/assets/hero image.png' },
-        { id: 'zb', name: 'Zinger Burger (Fish)', price: 700, desc: 'Spicy battered fish fillet, lettuce, and hot spicy sauce', img: '/assets/hero image.png' }
+        { id: 'cb', name: 'Colonel Burger (Fish)', price: 650, desc: 'Crispy breaded fish fillet, fresh lettuce, and sauce', img: '/assets/hero-image.png' },
+        { id: 'zb', name: 'Zinger Burger (Fish)', price: 700, desc: 'Spicy battered fish fillet, lettuce, and hot spicy sauce', img: '/assets/hero-image.png' }
     ],
     drinks: [
         { id: 'd1', name: 'Pepsi (500ml)', price: 150, desc: 'Chilled Soda', img: '' },
