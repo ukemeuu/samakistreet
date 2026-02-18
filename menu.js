@@ -179,7 +179,7 @@ function checkoutWhatsApp() {
     message += `\n*Total: KES ${total.toLocaleString()}*`;
     message += `\n\nMy delivery location is: `;
 
-    const phoneNumber = "2547XXXXXXXX"; // Replace with actual number
+    const phoneNumber = "254799034617"; // Updated per user request
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
     window.open(url, '_blank');
