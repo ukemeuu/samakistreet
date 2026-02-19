@@ -12,13 +12,12 @@ if (!isset($data['id']) || !isset($data['price'])) {
 }
 
 try {
-    $sql = "UPDATE menu_items SET name = :name, price = :price, description = :desc, image_url = :img WHERE item_id = :id";
+    $sql = "UPDATE menu_items SET price = :price, description = :desc, image_url = :img WHERE item_id = :id";
     $stmt = $conn->prepare($sql);
     $stmt->execute([
-        ':name' => $data['name'], // Added name update
         ':price' => $data['price'],
         ':desc' => $data['description'],
-        ':img' => $data['image_url'],
+        ':img' => $data['image_url'], // Added image update (expects full path string)
         ':id' => $data['id']
     ]);
 

@@ -26,12 +26,44 @@ async function loadMenuData() {
 // Cart Logic handled below
 
 // Render Menu
+// Render Menu
 function renderMenu() {
-    for (const [category, items] of Object.entries(menuData)) {
-        const container = document.getElementById(`grid-${category}`);
-        if (!container) continue;
+    const navContainer = document.getElementById('dynamic-nav');
+    const menuContainer = document.getElementById('dynamic-menu');
 
-        items.forEach(item => {
+    // If elements don't exist (e.g. on index.html), we skip full rendering
+    if (!navContainer || !menuContainer) return;
+
+    navContainer.innerHTML = '';
+    menuContainer.innerHTML = '';
+
+    menuData.forEach((cat, index) => {
+        // 1. Create Nav Button
+        const btn = document.createElement('button');
+        btn.className = `cat-btn ${index === 0 ? 'active' : ''}`;
+        btn.innerText = cat.title;
+        btn.onclick = (e) => {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            document.getElementById(cat.slug).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+        navContainer.appendChild(btn);
+
+        // 2. Create Section
+        const section = document.createElement('section');
+        section.id = cat.slug;
+        // Add scroll margin for sticky header
+        section.style.scrollMarginTop = "140px";
+
+        section.innerHTML = `
+            <h2 class="section-title">${cat.title}</h2>
+            <div class="menu-grid" id="grid-${cat.slug}"></div>
+        `;
+        menuContainer.appendChild(section);
+
+        // 3. Populate Items
+        const grid = section.querySelector('.menu-grid');
+        cat.items.forEach(item => {
             const el = document.createElement('div');
             el.className = 'menu-item';
             el.innerHTML = `
@@ -42,12 +74,12 @@ function renderMenu() {
                         <span class="menu-item-price">KES ${item.price.toLocaleString()}</span>
                     </div>
                     <p class="menu-item-desc">${item.desc}</p>
-                    <button class="add-btn" onclick="addToCart('${item.id}', '${category}')">Add to Order</button>
+                    <button class="add-btn" onclick="addToCart('${item.id}', '${cat.slug}')">Add to Order</button>
                 </div>
             `;
-            container.appendChild(el);
+            grid.appendChild(el);
         });
-    }
+    });
 }
 
 // Cart Logic
@@ -82,8 +114,8 @@ function removeFromCart(itemId) {
 }
 
 function getItemDetails(itemId) {
-    for (const cat of Object.values(menuData)) {
-        const found = cat.find(i => i.id === itemId);
+    for (const cat of menuData) {
+        const found = cat.items.find(i => i.id === itemId);
         if (found) return found;
     }
     return null;

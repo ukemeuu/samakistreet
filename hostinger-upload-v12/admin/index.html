@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samaki Street Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary-orange: #CF9145;
+            --color-deep-teal: #0F252F;
+            --color-white: #FFFFFF;
+            --color-light-gray: #F8F9FA;
+            --color-danger: #dc3545;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--color-light-gray);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--color-deep-teal);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .category-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .category-header input {
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+            color: var(--color-deep-teal);
+            width: auto;
+        }
+
+        .category-header input:focus {
+            background: #fff;
+            border: 1px solid #ddd;
+        }
+
+        .item-card {
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 20px;
+            align-items: start;
+            background: #fafafa;
+        }
+
+        .item-image-section {
+            width: 120px;
+            text-align: center;
+        }
+
+        .item-image-preview {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #ddd;
+            margin-bottom: 10px;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 5px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: var(--color-primary-orange);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--color-deep-teal);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--color-danger);
+            color: white;
+        }
+
+        .btn-upload {
+            background: #ddd;
+            color: #333;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+        }
+
+        .file-input {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Menu Editor</h1>
+            <div>
+                <a href="/" style="color:white; margin-right: 20px;">View Site</a>
+                <a href="/api/logout.php" style="color:white; text-decoration: underline;">Logout</a>
+            </div>
+        </div>
+
+        <div id="loading">Loading menu items...</div>
+        <div id="content"></div>
+    </div>
+
+    <script>
+        // Auth Check
+        fetch('/api/check_auth.php').then(res => {
+            if (!res.ok) window.location.href = '/admin/login.html';
+        });
+
+        async function loadMenu() {
+            try {
+                const res = await fetch('/api/get_menu.php');
+                const data = await res.json();
+
+                if (data.error) throw new Error(data.error);
+
+                const content = document.getElementById('content');
+                content.innerHTML = '';
+                document.getElementById('loading').style.display = 'none';
+
+                for (const [category, items] of Object.entries(data)) {
+                    const section = document.createElement('div');
+                    section.className = 'category-section';
+
+                    const header = document.createElement('div');
+                    header.className = 'category-header';
+                    header.innerHTML = `
+                    <input type="text" value="${category.toUpperCase()}" id="cat-title-${category}">
+                    <button class="btn btn-secondary" onclick="renameCategory('${category}')">Rename Category</button>
+                `;
+                    section.appendChild(header);
+
+                    items.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'item-card';
+                        card.innerHTML = `
+                        <div class="item-image-section">
+                            <img src="${item.img || '/assets/24183_main.avif'}" class="item-image-preview" id="preview-${item.id}">
+                            <input type="file" id="file-${item.id}" class="file-input" accept="image/*" onchange="uploadImage('${item.id}')">
+                            <button class="btn btn-upload" onclick="document.getElementById('file-${item.id}').click()">Change Image</button>
+                            <input type="hidden" id="img-url-${item.id}" value="${item.img}">
+                        </div>
+                        <div class="item-details">
+                            <h3>${item.name}</h3>
+                            <label>Price (KES)</label>
+                            <input type="number" id="price-${item.id}" value="${item.price}">
+                            
+                            <label>Description</label>
+                            <textarea id="desc-${item.id}" rows="3">${item.desc}</textarea>
+                            
+                            <div style="margin-top: 15px; text-align: right;">
+                                <button class="btn btn-primary" onclick="saveItem('${item.id}')">Save Changes</button>
+                            </div>
+                        </div>
+                    `;
+                        section.appendChild(card);
+                    });
+
+                    content.appendChild(section);
+                }
+
+            } catch (e) {
+                document.getElementById('loading').textContent = "Error loading menu: " + e.message;
+            }
+        }
+
+        async function uploadImage(itemId) {
+            const fileInput = document.getElementById(`file-${itemId}`);
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const btn = fileInput.nextElementSibling;
+                const originalText = btn.innerText;
+                btn.innerText = "Uploading...";
+                btn.disabled = true;
+
+                const res = await fetch('/api/upload_image.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    // Update preview and hidden input
+                    document.getElementById(`preview-${itemId}`).src = data.path;
+                    document.getElementById(`img-url-${itemId}`).value = data.path;
+                    alert('Image uploaded! Click "Save Changes" to persist.');
+                } else {
+                    alert('Upload failed: ' + data.error);
+                }
+
+                btn.innerText = originalText;
+                btn.disabled = false;
+            } catch (e) {
+                alert('Upload error');
+            }
+        }
+
+        async function renameCategory(oldName) {
+            const input = document.getElementById(`cat-title-${oldName}`);
+            const newName = input.value;
+
+            if (!confirm(`Rename category "${oldName}" to "${newName}"?`)) return;
+
+            try {
+                const res = await fetch('/api/update_category.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ old_name: oldName, new_name: newName })
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    alert('Category renamed! Reloading...');
+                    loadMenu();
+                } else {
+                    alert('Error renaming: ' + result.error);
+                }
+            } catch (e) {
+                alert('Network error');
+            }
+        }
+
+        async function saveItem(id) {
+            const price = document.getElementById(`price-${id}`).value;
+            const desc = document.getElementById(`desc-${id}`).value;
+            const img = document.getElementById(`img-url-${id}`).value;
+
+            try {
+                const res = await fetch('/api/update_menu.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id,
+                        price,
+                        description: desc,
+                        image_url: img
+                    })
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    alert('Saved successfully!');
+                } else {
+                    alert('Error saving: ' + result.error);
+                }
+            } catch (e) {
+                alert('Network error');
+            }
+        }
+
+        loadMenu();
+    </script>
+
+</body>
+
+</html>
