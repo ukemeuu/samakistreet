@@ -1,35 +1,29 @@
 
-const menuData = {
-    streetwise: [
-        { id: 's2', name: 'Streetwise 2', price: 490, desc: '2 Fish Fingers + Regular Chips', img: '/assets/Close-up-photo-of-a-serving-fish-and-chips.jpg' },
-        { id: 's3', name: 'Streetwise 3', price: 690, desc: '3 Fish Fingers + Regular Chips', img: '/assets/Close-up-photo-of-a-serving-fish-and-chips.jpg' },
-        { id: 's5', name: 'Streetwise 5', price: 1100, desc: '5 Fish Fingers + Large Chips', img: '/assets/Close-up-photo-of-a-serving-fish-and-chips.jpg' },
-        { id: 's7', name: 'Streetwise 7', price: 1790, desc: '7 Fish Fingers + Large Chips', img: '/assets/Close-up-photo-of-a-serving-fish-and-chips.jpg' }
-    ],
-    buckets: [
-        { id: 'b9', name: '9 PC Fish Bucket', price: 1900, desc: '9 Fish Fingers (No Sides)', img: '/assets/intro-1717534117.jpg' },
-        { id: 'bk', name: 'Kentucky Bucket', price: 2550, desc: '11 Fish Fingers + 2 Large Chips', img: '/assets/intro-1717534117.jpg' },
-        { id: 'bf', name: 'Colonel Bucket Feast', price: 2990, desc: '9 Fish Fingers + 1 Large Chips + Coleslaw + 2L Soda', img: '/assets/intro-1717534117.jpg' }
-    ],
-    boxes: [
-        { id: 'bl', name: 'Fish Lunchbox', price: 850, desc: '2 Fish Fingers + Reg Chips + Coleslaw + 300ml Soda', img: '/assets/Homemade-Filet-O-Fish_3.webp' },
-        { id: 'bcb', name: 'Crunch Burger Box', price: 950, desc: 'Fish Fillet Burger + 1 Fish Finger + Reg Chips + 300ml Soda', img: '/assets/Homemade-Filet-O-Fish_3.webp' },
-        { id: 'bsb', name: 'Samaki Bites Box', price: 850, desc: '5 Spicy Fish Bites + Reg Chips + 300ml Soda', img: '/assets/fish-bites.webp' }
-    ],
-    burgers: [
-        { id: 'cb', name: 'Colonel Burger (Fish)', price: 650, desc: 'Crispy breaded fish fillet, fresh lettuce, and sauce', img: '/assets/hero-image.png' },
-        { id: 'zb', name: 'Zinger Burger (Fish)', price: 700, desc: 'Spicy battered fish fillet, lettuce, and hot spicy sauce', img: '/assets/hero-image.png' }
-    ],
-    drinks: [
-        { id: 'd1', name: 'Pepsi (500ml)', price: 150, desc: 'Chilled Soda', img: '' },
-        { id: 'd2', name: 'Coca-Cola (500ml)', price: 150, desc: 'Chilled Soda', img: '' },
-        { id: 'd3', name: 'Mineral Water', price: 100, desc: 'Pure Water', img: '' },
-        { id: 'd4', name: 'Minute Maid', price: 200, desc: 'Fruit Juice', img: '' }
-    ]
-};
+// Global State
+let menuData = {};
+let cart = {};
+
+// Fetch Menu from API
+async function loadMenuData() {
+    try {
+        const response = await fetch('/api/get_menu.php');
+        const data = await response.json();
+
+        // If API returns error or empty, fallback (optional, currently just logging)
+        if (data.error) {
+            console.error("API Error:", data.error);
+            return;
+        }
+
+        menuData = data;
+        renderMenu();
+    } catch (error) {
+        console.error("Failed to load menu:", error);
+    }
+}
 
 // State
-let cart = {}; // { itemId: quantity }
+// Cart Logic handled below
 
 // Render Menu
 function renderMenu() {
@@ -186,4 +180,5 @@ function checkoutWhatsApp() {
 }
 
 // Initialize
-document.addEventListener('DOMContentLoaded', renderMenu);
+// Initialize
+document.addEventListener('DOMContentLoaded', loadMenuData);

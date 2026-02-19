@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samaki Street Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary-orange: #CF9145;
+            --color-deep-teal: #0F252F;
+            --color-white: #FFFFFF;
+            --color-light-gray: #F8F9FA;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--color-light-gray);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--color-deep-teal);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .item-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 5px;
+            font-family: inherit;
+        }
+
+        .save-btn {
+            background: var(--color-primary-orange);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .save-btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Menu Editor</h1>
+            <a href="/" style="color:white">View Site</a>
+        </div>
+
+        <div id="loading">Loading menu items...</div>
+        <div id="content"></div>
+    </div>
+
+    <script>
+        async function loadMenu() {
+            try {
+                const res = await fetch('/api/get_menu.php');
+                const data = await res.json();
+
+                if (data.error) throw new Error(data.error);
+
+                const content = document.getElementById('content');
+                content.innerHTML = '';
+                document.getElementById('loading').style.display = 'none';
+
+                for (const [category, items] of Object.entries(data)) {
+                    const catHeader = document.createElement('h2');
+                    catHeader.textContent = category.toUpperCase();
+                    content.appendChild(catHeader);
+
+                    items.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'item-card';
+                        card.innerHTML = `
+                        <div class="item-details">
+                            <h3>${item.name}</h3>
+                            <label>Price (KES)</label>
+                            <input type="number" id="price-${item.id}" value="${item.price}">
+                            
+                            <label>Description</label>
+                            <textarea id="desc-${item.id}">${item.desc}</textarea>
+                        </div>
+                        <button class="save-btn" onclick="saveItem('${item.id}')">Save Changes</button>
+                    `;
+                        content.appendChild(card);
+                    });
+                }
+
+            } catch (e) {
+                document.getElementById('loading').textContent = "Error loading menu: " + e.message;
+            }
+        }
+
+        async function saveItem(id) {
+            const price = document.getElementById(`price-${id}`).value;
+            const desc = document.getElementById(`desc-${id}`).value;
+
+            try {
+                const res = await fetch('/api/update_menu.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, price, description: desc })
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    alert('Saved successfully!');
+                } else {
+                    alert('Error saving: ' + result.error);
+                }
+            } catch (e) {
+                alert('Network error');
+            }
+        }
+
+        loadMenu();
+    </script>
+
+</body>
+
+</html>
